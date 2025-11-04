@@ -15,7 +15,7 @@ from config import (
 from data_loader import load_all_conditions
 from signal_processor import compute_all_frequency_spectra, get_frequency_display_range
 from plotter_static import create_time_domain_pdf, create_frequency_domain_pdf
-from logger_utils import setup_logging, enable_print_logging
+from logger_utils import setup_logging
 
 # Setup logging will be done in main()
 logger = logging.getLogger(__name__)
@@ -35,7 +35,6 @@ def main(data_path: Path = None):
     # Setup logging to file and console
     output_dir = Path("output")
     log_path = setup_logging(output_dir, "pdf_export_log.txt")
-    enable_print_logging(log_path)
     
     print("📄 PDF EXPORT TOOL (Matplotlib Backend)")
     print(f"\nUsing data path: {data_path}")

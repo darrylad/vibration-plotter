@@ -14,7 +14,7 @@ from config import (
 from data_loader import load_all_conditions
 from plotter import create_vibration_plot, create_frequency_plot
 from signal_processor import compute_all_frequency_spectra, get_frequency_display_range
-from logger_utils import setup_logging, enable_print_logging
+from logger_utils import setup_logging
 
 # Setup logging will be done in main()
 logger = logging.getLogger(__name__)
@@ -31,10 +31,9 @@ def main(data_path: Path = None):
     if data_path is None:
         data_path = DATA_ROOT
     
-    # Setup logging to file and console
+    # Setup logging to file and console 
     output_dir = Path("output")
     log_path = setup_logging(output_dir, "log.txt")
-    enable_print_logging(log_path)
     
     print(f"Using data path: {data_path}")
     print(f"Logging to: {log_path}\n")
@@ -99,11 +98,6 @@ def main(data_path: Path = None):
     freq_output = output_dir / "frequency_domain.html"
     freq_fig.write_html(str(freq_output))
     print(f"✅ Frequency domain plot saved to: {freq_output}")
-    
-    # Show both in browser
-    print("\n🌐 Opening plots in browser...")
-    time_fig.show()
-    freq_fig.show()
     
     print("COMPLETE")
     print("\nGenerated files:")
