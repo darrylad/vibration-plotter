@@ -141,7 +141,7 @@ def create_vibration_plot(all_data: Dict[str, pd.DataFrame],
         subplot_titles=subplot_titles,
         vertical_spacing=0.05,
         horizontal_spacing=0.03,
-        shared_xaxes=True,  # Share x-axis (time) across columns
+        shared_xaxes='rows',  # Share x-axis (time) across columns
     )
     
     # Add traces for each condition and axis
@@ -246,7 +246,7 @@ def create_frequency_plot(all_spectra: Dict[str, Dict],
         subplot_titles=subplot_titles,
         vertical_spacing=0.05,
         horizontal_spacing=0.03,
-        shared_xaxes=True,  # Share x-axis (frequency) across columns
+        shared_xaxes='rows',  # Share x-axis (frequency) across rows
     )
     
     # Add traces for each condition and axis

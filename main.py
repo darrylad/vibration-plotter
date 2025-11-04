@@ -84,7 +84,7 @@ def main(data_path: Path = None):
         max_frequency=max_freq
     )
     
-    print("STEP 5: SAVING AND DISPLAYING")
+    print("STEP 5: SAVING")
 
     # Create output directory (already exists from logging setup)
     output_dir.mkdir(exist_ok=True)
