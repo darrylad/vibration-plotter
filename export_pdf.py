@@ -15,12 +15,9 @@ from config import (
 from data_loader import load_all_conditions
 from signal_processor import compute_all_frequency_spectra, get_frequency_display_range
 from plotter_static import create_time_domain_pdf, create_frequency_domain_pdf
+from logger_utils import setup_logging, enable_print_logging
 
-# Setup logging
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(levelname)s: %(message)s'
-)
+# Setup logging will be done in main()
 logger = logging.getLogger(__name__)
 
 
@@ -35,8 +32,14 @@ def main(data_path: Path = None):
     if data_path is None:
         data_path = DATA_ROOT
     
+    # Setup logging to file and console
+    output_dir = Path("output")
+    log_path = setup_logging(output_dir, "pdf_export_log.txt")
+    enable_print_logging(log_path)
+    
     print("📄 PDF EXPORT TOOL (Matplotlib Backend)")
     print(f"\nUsing data path: {data_path}")
+    print(f"Logging to: {log_path}")
     print(f"\nConfiguration:")
     print(f"  Figure size: {PDF_CONFIG['figsize'][0]}\" × {PDF_CONFIG['figsize'][1]}\"")
     print(f"  DPI: {PDF_CONFIG['dpi']}")
@@ -66,7 +69,7 @@ def main(data_path: Path = None):
     
     print(f"\n✅ Computed spectra for {len(all_spectra)} conditions")
     
-    output_dir = Path("output")
+    # Output directory already exists from logging setup
     output_dir.mkdir(exist_ok=True)
     
     print("STEP 3: GENERATING TIME-DOMAIN PDF")
@@ -99,6 +102,7 @@ def main(data_path: Path = None):
     print("\nGenerated files:")
     print(f"  📈 Time Domain:      {time_pdf_path}")
     print(f"  📊 Frequency Domain: {freq_pdf_path}")
+    print(f"  📝 Log File:         {log_path}")
     print("\nFile specifications:")
     print(f"  Format: PDF (rasterized)")
     print(f"  Resolution: {PDF_CONFIG['dpi']} DPI")
@@ -112,7 +116,7 @@ if __name__ == "__main__":
         # Use provided path
         custom_path = Path(sys.argv[1])
         if not custom_path.exists():
-            logger.error(f"❌ Path does not exist: {custom_path}")
+            print(f"❌ Path does not exist: {custom_path}")
             sys.exit(1)
         main(data_path=custom_path)
     else:

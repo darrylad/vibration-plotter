@@ -14,12 +14,9 @@ from config import (
 from data_loader import load_all_conditions
 from plotter import create_vibration_plot, create_frequency_plot
 from signal_processor import compute_all_frequency_spectra, get_frequency_display_range
+from logger_utils import setup_logging, enable_print_logging
 
-# Setup logging
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(levelname)s: %(message)s'
-)
+# Setup logging will be done in main()
 logger = logging.getLogger(__name__)
 
 
@@ -34,7 +31,13 @@ def main(data_path: Path = None):
     if data_path is None:
         data_path = DATA_ROOT
     
+    # Setup logging to file and console
+    output_dir = Path("output")
+    log_path = setup_logging(output_dir, "log.txt")
+    enable_print_logging(log_path)
+    
     print(f"Using data path: {data_path}")
+    print(f"Logging to: {log_path}\n")
     
     print("STEP 1: LOADING DATA")
     
@@ -84,8 +87,7 @@ def main(data_path: Path = None):
     
     print("STEP 5: SAVING AND DISPLAYING")
 
-    # Create output directory
-    output_dir = Path("output")
+    # Create output directory (already exists from logging setup)
     output_dir.mkdir(exist_ok=True)
     
     # Save time domain plot
@@ -107,6 +109,7 @@ def main(data_path: Path = None):
     print("\nGenerated files:")
     print(f"  📈 Time Domain:      {time_output}")
     print(f"  📊 Frequency Domain: {freq_output}")
+    print(f"  📝 Log File:         {log_path}")
     print("\nInteractive features:")
     print("  • Zoom: Click and drag")
     print("  • Pan: Hold shift and drag")
@@ -121,7 +124,7 @@ if __name__ == "__main__":
         # Use provided path
         custom_path = Path(sys.argv[1])
         if not custom_path.exists():
-            logger.error(f"❌ Path does not exist: {custom_path}")
+            print(f"❌ Path does not exist: {custom_path}")
             sys.exit(1)
         main(data_path=custom_path)
     else:
