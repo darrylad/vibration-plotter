@@ -3,6 +3,7 @@ Main script to run the vibration data analysis and plotting.
 """
 
 import logging
+import sys
 from pathlib import Path
 
 # Import our modules
@@ -10,7 +11,7 @@ from config import (
     DATA_ROOT, CONDITIONS, PLOT_CONFIG, AXIS_COLORS, 
     TIME_COLUMN, AXIS_COLUMNS, FFT_CONFIG
 )
-from data_loader import load_all_conditions, test_loading
+from data_loader import load_all_conditions
 from plotter import create_vibration_plot, create_frequency_plot
 from signal_processor import compute_all_frequency_spectra, get_frequency_display_range
 
@@ -22,13 +23,22 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
-def main():
+def main(data_path: Path = None):
     """
     Main function to execute the complete analysis pipeline.
+    
+    Args:
+        data_path: Optional path to data directory. If None, uses DATA_ROOT from config.
     """
+    # Use provided path or default from config
+    if data_path is None:
+        data_path = DATA_ROOT
+    
+    print(f"Using data path: {data_path}")
+    
     print("STEP 1: LOADING DATA")
     
-    all_data = load_all_conditions(DATA_ROOT, CONDITIONS)
+    all_data = load_all_conditions(data_path, CONDITIONS)
     
     if not all_data:
         logger.error("❌ No data loaded! Check your data path and condition names.")
@@ -105,19 +115,15 @@ def main():
     print("  • Compare: Hover shows all values at same point")
 
 
-
-def test_single_condition(condition: str = "Healthy"):
-    """
-    Test function to load and examine a single condition.
-    Useful for debugging and understanding the data.
-    """
-    test_loading(DATA_ROOT, condition)
-
-
 if __name__ == "__main__":
-    # Run the main analysis
-    main()
-    
-    # Uncomment below to test individual conditions:
-    # test_single_condition("Healthy")
-    # test_single_condition("10 um")
+    # Check for command-line argument
+    if len(sys.argv) > 1:
+        # Use provided path
+        custom_path = Path(sys.argv[1])
+        if not custom_path.exists():
+            logger.error(f"❌ Path does not exist: {custom_path}")
+            sys.exit(1)
+        main(data_path=custom_path)
+    else:
+        # Use default path from config
+        main()

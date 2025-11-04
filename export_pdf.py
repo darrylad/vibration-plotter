@@ -4,6 +4,7 @@ Run this separately from the main HTML generation.
 """
 
 import logging
+import sys
 from pathlib import Path
 
 # Import modules
@@ -23,27 +24,28 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
-def main():
+def main(data_path: Path = None):
     """
     Main function for PDF export.
+    
+    Args:
+        data_path: Optional path to data directory. If None, uses DATA_ROOT from config.
     """
-    print("="*80)
+    # Use provided path or default from config
+    if data_path is None:
+        data_path = DATA_ROOT
+    
     print("📄 PDF EXPORT TOOL (Matplotlib Backend)")
-    print("="*80)
+    print(f"\nUsing data path: {data_path}")
     print(f"\nConfiguration:")
     print(f"  Figure size: {PDF_CONFIG['figsize'][0]}\" × {PDF_CONFIG['figsize'][1]}\"")
     print(f"  DPI: {PDF_CONFIG['dpi']}")
     print(f"  Downsampling: Every {PDF_CONFIG['downsample_factor']} points")
     print(f"  Rasterized: {PDF_CONFIG['rasterized']}")
     
-    # ========================================================================
-    # STEP 1: LOAD DATA
-    # ========================================================================
-    print("\n" + "="*80)
     print("STEP 1: LOADING DATA")
-    print("="*80)
     
-    all_data = load_all_conditions(DATA_ROOT, CONDITIONS)
+    all_data = load_all_conditions(data_path, CONDITIONS)
     
     if not all_data:
         logger.error("❌ No data loaded! Check your data path.")
@@ -51,12 +53,7 @@ def main():
     
     print(f"\n✅ Loaded {len(all_data)} conditions")
     
-    # ========================================================================
-    # STEP 2: COMPUTE FREQUENCY SPECTRA
-    # ========================================================================
-    print("\n" + "="*80)
     print("STEP 2: COMPUTING FREQUENCY SPECTRA")
-    print("="*80)
     
     all_spectra = compute_all_frequency_spectra(
         all_data=all_data,
@@ -69,18 +66,10 @@ def main():
     
     print(f"\n✅ Computed spectra for {len(all_spectra)} conditions")
     
-    # ========================================================================
-    # STEP 3: CREATE OUTPUT DIRECTORY
-    # ========================================================================
     output_dir = Path("output")
     output_dir.mkdir(exist_ok=True)
     
-    # ========================================================================
-    # STEP 4: GENERATE TIME-DOMAIN PDF
-    # ========================================================================
-    print("\n" + "="*80)
     print("STEP 3: GENERATING TIME-DOMAIN PDF")
-    print("="*80)
     
     time_pdf_path = output_dir / "time_domain.pdf"
     create_time_domain_pdf(
@@ -93,12 +82,7 @@ def main():
         output_path=time_pdf_path
     )
     
-    # ========================================================================
-    # STEP 5: GENERATE FREQUENCY-DOMAIN PDF
-    # ========================================================================
-    print("\n" + "="*80)
     print("STEP 4: GENERATING FREQUENCY-DOMAIN PDF")
-    print("="*80)
     
     freq_pdf_path = output_dir / "frequency_domain.pdf"
     create_frequency_domain_pdf(
@@ -111,12 +95,7 @@ def main():
         output_path=freq_pdf_path
     )
     
-    # ========================================================================
-    # COMPLETE
-    # ========================================================================
-    print("\n" + "="*80)
-    print("✨ PDF EXPORT COMPLETE!")
-    print("="*80)
+    print("PDF EXPORT COMPLETE")
     print("\nGenerated files:")
     print(f"  📈 Time Domain:      {time_pdf_path}")
     print(f"  📊 Frequency Domain: {freq_pdf_path}")
@@ -128,4 +107,14 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    # Check for command-line argument
+    if len(sys.argv) > 1:
+        # Use provided path
+        custom_path = Path(sys.argv[1])
+        if not custom_path.exists():
+            logger.error(f"❌ Path does not exist: {custom_path}")
+            sys.exit(1)
+        main(data_path=custom_path)
+    else:
+        # Use default path from config
+        main()
