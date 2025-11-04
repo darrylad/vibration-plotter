@@ -29,3 +29,46 @@ AXIS_COLORS = {
 # Data column names (from your CSV)
 TIME_COLUMN = "Channel name"
 AXIS_COLUMNS = ["X", "Y", "Z"]
+
+# FFT Configuration
+FFT_CONFIG = {
+    "nperseg": 1024,        # Window size for Welch's method (power of 2)
+    "max_frequency": None,  # Max frequency to display (None = auto, up to Nyquist)
+    "freq_units": "Hz",
+    "mag_units": "Acceleration (g)",
+    "overlap": 512,         # Overlap between segments (usually nperseg/2)
+}
+
+# PDF Export Configuration
+PDF_CONFIG = {
+    # Figure size (width, height) in inches
+    # For widescreen: 16:9 aspect ratio
+    # 20 inches wide = ~1920px at 96 DPI (typical monitor)
+    "figsize": (20, 12),    # Wide format for monitors
+    
+    # DPI (dots per inch) - resolution quality
+    # 150 DPI = good screen quality, reasonable file size
+    # 300 DPI = print quality (use if needed, but larger files)
+    "dpi": 150,
+    
+    # Downsampling for faster rendering
+    # Keep every Nth point (10 = keep 10%, discard 90%)
+    # Visual quality remains identical on screen
+    "downsample_factor": 10,
+    
+    # Line width for plots
+    "line_width": 0.8,
+    
+    # Font sizes
+    "title_size": 14,
+    "label_size": 10,
+    "tick_size": 8,
+    "suptitle_size": 16,
+    
+    # Spacing between subplots
+    "hspace": 0.3,  # Vertical space
+    "wspace": 0.15,  # Horizontal space
+    
+    # Rasterization (converts plots to pixels for smaller file size)
+    "rasterized": True,
+}

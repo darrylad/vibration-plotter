@@ -6,9 +6,13 @@ import logging
 from pathlib import Path
 
 # Import our modules
-from config import DATA_ROOT, CONDITIONS, PLOT_CONFIG, AXIS_COLORS, TIME_COLUMN, AXIS_COLUMNS
+from config import (
+    DATA_ROOT, CONDITIONS, PLOT_CONFIG, AXIS_COLORS, 
+    TIME_COLUMN, AXIS_COLUMNS, FFT_CONFIG
+)
 from data_loader import load_all_conditions, test_loading
-from plotter import create_vibration_plot
+from plotter import create_vibration_plot, create_frequency_plot
+from signal_processor import compute_all_frequency_spectra, get_frequency_display_range
 
 # Setup logging
 logging.basicConfig(
@@ -22,7 +26,6 @@ def main():
     """
     Main function to execute the complete analysis pipeline.
     """
-
     print("STEP 1: LOADING DATA")
     
     all_data = load_all_conditions(DATA_ROOT, CONDITIONS)
@@ -33,9 +36,23 @@ def main():
     
     print(f"\n✅ Successfully loaded {len(all_data)} conditions")
     
-    print("STEP 2: CREATING INTERACTIVE PLOT")
+    print("STEP 2: COMPUTING FREQUENCY SPECTRA (FFT)")
     
-    fig = create_vibration_plot(
+    all_spectra = compute_all_frequency_spectra(
+        all_data=all_data,
+        time_column=TIME_COLUMN,
+        axis_columns=AXIS_COLUMNS,
+        fft_config=FFT_CONFIG
+    )
+    
+    # Determine frequency display range
+    max_freq = get_frequency_display_range(all_spectra, FFT_CONFIG)
+    
+    print(f"\n✅ Successfully computed spectra for {len(all_spectra)} conditions")
+    
+    print("STEP 3: CREATING TIME DOMAIN PLOT")
+    
+    time_fig = create_vibration_plot(
         all_data=all_data,
         conditions=CONDITIONS,
         time_column=TIME_COLUMN,
@@ -44,28 +61,49 @@ def main():
         plot_config=PLOT_CONFIG
     )
     
-    print("STEP 3: SAVING AND DISPLAYING")
+    print("STEP 4: CREATING FREQUENCY DOMAIN PLOT")
     
+    freq_fig = create_frequency_plot(
+        all_spectra=all_spectra,
+        conditions=CONDITIONS,
+        axis_columns=AXIS_COLUMNS,
+        axis_colors=AXIS_COLORS,
+        plot_config=PLOT_CONFIG,
+        max_frequency=max_freq
+    )
+    
+    print("STEP 5: SAVING AND DISPLAYING")
+
     # Create output directory
     output_dir = Path("output")
     output_dir.mkdir(exist_ok=True)
     
-    # Save as interactive HTML
-    output_file = output_dir / "vibration_analysis.html"
-    fig.write_html(str(output_file))
-    print(f"\n✅ Interactive plot saved to: {output_file}")
+    # Save time domain plot
+    time_output = output_dir / "time_domain.html"
+    time_fig.write_html(str(time_output))
+    print(f"\n✅ Time domain plot saved to: {time_output}")
     
-    # Show in browser
-    print("🌐 Opening plot in browser...")
-    fig.show()
+    # Save frequency domain plot
+    freq_output = output_dir / "frequency_domain.html"
+    freq_fig.write_html(str(freq_output))
+    print(f"✅ Frequency domain plot saved to: {freq_output}")
     
-    print("✨ ANALYSIS COMPLETE")
+    # Show both in browser
+    print("\n🌐 Opening plots in browser...")
+    time_fig.show()
+    freq_fig.show()
+    
+    print("COMPLETE")
+    print("\nGenerated files:")
+    print(f"  📈 Time Domain:      {time_output}")
+    print(f"  📊 Frequency Domain: {freq_output}")
     print("\nInteractive features:")
     print("  • Zoom: Click and drag")
     print("  • Pan: Hold shift and drag")
     print("  • Reset: Double click")
     print("  • Hover: See exact values")
-    print("  • Compare: Hover shows all Y values at same time point")
+    print("  • Compare: Hover shows all values at same point")
+
 
 
 def test_single_condition(condition: str = "Healthy"):
